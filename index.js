@@ -8,7 +8,6 @@ const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
   channelSecret: "56fe1efe851985cd2ab135863f1ed13a",
 };
-
 // create LINE SDK client
 const client = new line.Client(config);
 
