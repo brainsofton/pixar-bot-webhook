@@ -37,7 +37,7 @@ function handleEvent(event) {
       type: "text",
       text: "Hello from heroku server"
     };
-    return client.pushMessage(event.replyToken, payload);
+    return client.pushMessage(event.pushMessage, payload);
   }
 
   
