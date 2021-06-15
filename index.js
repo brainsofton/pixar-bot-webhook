@@ -114,7 +114,7 @@ function handleText(message, replyToken, source) {
             text: "select something",
             quickReply :
             { 
-              itemps:[
+              items:[
               {
                 type :"action",
                 action: {
