@@ -2,7 +2,7 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-
+const path = require('path')
 // create LINE SDK config from env variables
 const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
@@ -15,7 +15,8 @@ const client = new line.Client(config);
 // create Express app
 // about Express itself: https://expressjs.com/
 const app = express();
-app.use('/static', express.static('static'));
+app.use(express.static(path.join(__dirname,'static')))
+// app.use('/static', express.static('static'));
 app.use('/downloaded', express.static('downloaded'));
 
 app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
@@ -92,7 +93,7 @@ function handleEvent(event) {
 }
 
 function handleText(message, replyToken, source) {
-  const buttonsImageURL = `./static/buttons/1040.jpg`;
+  const buttonsImageURL = `/static/buttons/1040.jpg`;
 
   switch (message.text) {
     case 'profile':
