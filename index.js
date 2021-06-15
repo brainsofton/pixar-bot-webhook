@@ -107,11 +107,11 @@ function handleText(message, replyToken, source) {
           //     `Status message: ${profile.statusMessage}`
           //   ]
           // ))
-          .then((profile) => client.replyMessage(
+          .then(() => client.replyMessage(
             replyToken,
             {
             type:"text",
-            text: `select something ${profile.displayName}`,
+            text: "select something",
             quickReply :
             { 
               items:[
@@ -120,15 +120,22 @@ function handleText(message, replyToken, source) {
                 action: {
                   type: "location",
                   label: 'Send Location',
-                  text: 'sushi'
+                  text: 'send location'
                 }
               },
               {
-                type :"text",
+                type :"action",
+                action: {
+                  type: "camera",
+                  label: 'Open camera',
+                  text: 'Open camera'
+                }
+              },{
+                type :"action",
                 action: {
                   type: "text",
                   label: 'ลองกดดู',
-                  text: 'กดทำไมจ๊ะ'
+                  text: 'กดทำไม? งื้อ'
                 }
               }
               ]
