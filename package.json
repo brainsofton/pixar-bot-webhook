@@ -8,7 +8,7 @@
     "start": "node ."
   },
   "dependencies": {
-    "@line/bot-sdk": "../../",
+    "@line/bot-sdk": "*",
     "express": "^4.17.1",
     "ngrok": "^3.2.7"
   }
