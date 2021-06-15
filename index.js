@@ -104,7 +104,7 @@ function handleEvent(event) {
 }
 
 function handleText(message, replyToken, source) {
-  const buttonsImageURL = '/static/buttons/1040.jpg';
+  const buttonsImageURL = './static/buttons/1040.jpg';
 
   switch (message.text) {
     case 'profile':
@@ -121,26 +121,25 @@ function handleText(message, replyToken, source) {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');
       }
     case 'buttons':
-      return replyText(replyToken, 'เข้า Button');
-      // then(() => replyMessage(
-      //   replyToken,
-      //   {
-      //     type: 'template',
-      //     altText: 'Buttons alt text',
-      //     template: {
-      //       type: 'buttons',
-      //       thumbnailImageUrl: buttonsImageURL,
-      //       title: 'My button sample',
-      //       text: 'Hello, my button',
-      //       actions: [
-      //         { label: 'Go to line.me', type: 'uri', uri: 'https://line.me' },
-      //         { label: 'Say hello1', type: 'postback', data: 'hello こんにちは' },
-      //         { label: '言 hello2', type: 'postback', data: 'hello こんにちは', text: 'hello こんにちは' },
-      //         { label: 'Say message', type: 'message', text: 'Rice=米' },
-      //       ],
-      //     },
-      //   }
-      // ));
+      return replyMessage(
+        replyToken,
+        {
+          type: 'template',
+          altText: 'Buttons alt text',
+          template: {
+            type: 'buttons',
+            thumbnailImageUrl: buttonsImageURL,
+            title: 'My button sample',
+            text: 'Hello, my button',
+            actions: [
+              { label: 'Go to line.me', type: 'uri', uri: 'https://line.me' },
+              { label: 'Say hello1', type: 'postback', data: 'hello こんにちは' },
+              { label: '言 hello2', type: 'postback', data: 'hello こんにちは', text: 'hello こんにちは' },
+              { label: 'Say message', type: 'message', text: 'Rice=米' },
+            ],
+          },
+        }
+      ));
     case 'confirm':
       return client.replyMessage(
         replyToken,
