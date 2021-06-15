@@ -111,7 +111,7 @@ function handleText(message, replyToken, source) {
             replyToken,
             {
             type:"text",
-            text: ["select something",`${profile.displayName}`],
+            text: `select something ${profile.displayName}`,
             quickReply :
             { 
               items:[
