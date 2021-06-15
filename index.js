@@ -1,13 +1,17 @@
+  
 'use strict';
 
 const line = require('@line/bot-sdk');
 const express = require('express');
+const handleText = require('./HandleText/HandleText')
 
 // create LINE SDK config from env variables
 const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
   channelSecret: "56fe1efe851985cd2ab135863f1ed13a",
 };
+// base URL for webhook server
+let baseURL = process.env.BASE_URL;
 // create LINE SDK client
 const client = new line.Client(config);
 
@@ -15,9 +19,20 @@ const client = new line.Client(config);
 // about Express itself: https://expressjs.com/
 const app = express();
 
+// serve static and downloaded files
+app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
+
 // register a webhook handler with middleware
 // about the middleware, please refer to doc
 app.post('/callback', line.middleware(config), (req, res) => {
+  if (req.body.destination) {
+    console.log("Destination User ID: " + req.body.destination);
+  }
+
+  // req.body.events should be an array of events
+  if (!Array.isArray(req.body.events)) {
+    return res.status(500).end();
+  }
   Promise
     .all(req.body.events.map(handleEvent))
     .then((result) => res.json(result))
@@ -29,24 +44,55 @@ app.post('/callback', line.middleware(config), (req, res) => {
 
 // event handler
 function handleEvent(event) {
-  if (event.type !== 'message' || event.message.type !== 'text') {
-    // ignore non-text-message event
-    return Promise.resolve(null);
-  } else if (event.message.type === "text" || event.message.text === "Hello") {
-    const payload = {
-      type: "text",
-      text: "Hello from heroku server"
-    };
-    return client.replyMessage(event.replyToken, payload);
+  if (event.replyToken && event.replyToken.match(/^(.)\1*$/)) {
+    return console.log("Test hook recieved: " + JSON.stringify(event.message));
   }
 
-  
+  switch (event.type) {
+    case 'message':
+      const message = event.message;
+      switch (message.type) {
+        case 'text':
+          return handleText.handleText(message, event.replyToken, event.source);
+        // case 'image':
+        //   return handleImage(message, event.replyToken);
+        // case 'video':
+        //   return handleVideo(message, event.replyToken);
+        // case 'audio':
+        //   return handleAudio(message, event.replyToken);
+        // case 'location':
+        //   return handleLocation(message, event.replyToken);
+        // case 'sticker':
+        //   return handleSticker(message, event.replyToken);
+        default:
+          throw new Error(`Unknown message: ${JSON.stringify(message)}`);
+      }
 
-  // create a echoing text message
-  const echo = { type: 'text', text: event.message.text };
+    case 'follow':
+      return replyText(event.replyToken, 'Got followed event');
 
-  // use reply API
-  return client.replyMessage(event.replyToken, echo);
+    case 'unfollow':
+      return console.log(`Unfollowed this bot: ${JSON.stringify(event)}`);
+
+    case 'join':
+      return replyText(event.replyToken, `Joined ${event.source.type}`);
+
+    case 'leave':
+      return console.log(`Left: ${JSON.stringify(event)}`);
+
+    case 'postback':
+      let data = event.postback.data;
+      if (data === 'DATE' || data === 'TIME' || data === 'DATETIME') {
+        data += `(${JSON.stringify(event.postback.params)})`;
+      }
+      return replyText(event.replyToken, `Got postback: ${data}`);
+
+    case 'beacon':
+      return replyText(event.replyToken, `Got beacon: ${event.beacon.hwid}`);
+
+    default:
+      throw new Error(`Unknown event: ${JSON.stringify(event)}`);
+  }
 }
 
 // listen on port
