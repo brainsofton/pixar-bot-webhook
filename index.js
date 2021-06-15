@@ -3,15 +3,13 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-const handleText = require('./HandleText/HandleText')
+const hdTxt = require('./HandleText/HandleText')
 
 // create LINE SDK config from env variables
 const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
   channelSecret: "56fe1efe851985cd2ab135863f1ed13a",
 };
-// base URL for webhook server
-let baseURL = process.env.BASE_URL;
 // create LINE SDK client
 const client = new line.Client(config);
 
@@ -19,27 +17,16 @@ const client = new line.Client(config);
 // about Express itself: https://expressjs.com/
 const app = express();
 
-// serve static and downloaded files
-app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
-
 // register a webhook handler with middleware
 // about the middleware, please refer to doc
 app.post('/callback', line.middleware(config), (req, res) => {
-  if (req.body.destination) {
-    console.log("Destination User ID: " + req.body.destination);
-  }
-
-  // req.body.events should be an array of events
-  if (!Array.isArray(req.body.events)) {
-    return res.status(500).end();
-  }
   Promise
-    .all(req.body.events.map(handleEvent))
-    .then((result) => res.json(result))
-    .catch((err) => {
-      console.error(err);
-      res.status(500).end();
-    });
+  .all(req.body.events.map(handleEvent))
+  .then((result) => res.json(result))
+  .catch((err) => {
+    console.error(err);
+    res.status(500).end();
+  });
 });
 
 // event handler
@@ -53,7 +40,7 @@ function handleEvent(event) {
       const message = event.message;
       switch (message.type) {
         case 'text':
-          return handleText.handleText(message, event.replyToken, event.source);
+          return hdTxt.handleText(message, event.replyToken, event.source);
         // case 'image':
         //   return handleImage(message, event.replyToken);
         // case 'video':
