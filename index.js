@@ -133,7 +133,7 @@ function handleText(message, replyToken, source) {
               },{
                 type :"action",
                 action: {
-                  type: "text",
+                  type: "message",
                   label: 'ลองกดดู',
                   text: 'กดทำไม? งื้อ'
                 }
