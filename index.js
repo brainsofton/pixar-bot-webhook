@@ -100,13 +100,13 @@ function handleText(message, replyToken, source) {
     case 'profile':
       if (source.userId) {
         return client.getProfile(source.userId)
-          .then((profile) => replyText(
-            replyToken,
-            [
-              `Display name: ${profile.displayName}`,
-              `Status message: ${profile.statusMessage}`
-            ]
-          ))
+          // .then((profile) => replyText(
+          //   replyToken,
+          //   [
+          //     `Display name: ${profile.displayName}`,
+          //     `Status message: ${profile.statusMessage}`
+          //   ]
+          // ))
           .then((profile)=> client.quickReply(
             replyToken,[
               {
