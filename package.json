@@ -1,15 +1,13 @@
 {
-  "name": "kitchensink",
+  "name": "echo-bot",
   "version": "0.0.0",
-  "description": "A kitchen-sink LINE bot example",
+  "description": "An example LINE bot just to echo messages",
   "main": "index.js",
   "scripts": {
-    "build-sdk": "cd ../../; npm i; npm run build",
     "start": "node ."
   },
   "dependencies": {
-    "@line/bot-sdk": "*",
-    "express": "^4.17.1",
-    "ngrok": "^3.2.7"
+    "@line/bot-sdk": "^6.8.0",
+    "express": "^4.16.3"
   }
 }

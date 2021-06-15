@@ -1,11 +1,7 @@
-  
 'use strict';
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-const fs = require('fs');
-const path = require('path');
-const cp = require('child_process');
 
 // create LINE SDK config from env variables
 const config = {
@@ -19,14 +15,12 @@ const client = new line.Client(config);
 // create Express app
 // about Express itself: https://expressjs.com/
 const app = express();
-
-// serve static and downloaded files
 app.use('/static', express.static('static'));
 app.use('/downloaded', express.static('downloaded'));
 
 app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
-
-// webhook callback
+// register a webhook handler with middleware
+// about the middleware, please refer to doc
 app.post('/callback', line.middleware(config), (req, res) => {
   Promise
     .all(req.body.events.map(handleEvent))
@@ -36,7 +30,6 @@ app.post('/callback', line.middleware(config), (req, res) => {
       res.status(500).end();
     });
 });
-
 // simple reply function
 const replyText = (token, texts) => {
   texts = Array.isArray(texts) ? texts : [texts];
@@ -45,8 +38,7 @@ const replyText = (token, texts) => {
     texts.map((text) => ({ type: 'text', text }))
   );
 };
-
-// callback function to handle a single event
+// event handler
 function handleEvent(event) {
   if (event.replyToken && event.replyToken.match(/^(.)\1*$/)) {
     return console.log("Test hook recieved: " + JSON.stringify(event.message));
@@ -100,7 +92,7 @@ function handleEvent(event) {
 }
 
 function handleText(message, replyToken, source) {
-  const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
+  const buttonsImageURL = `./static/buttons/1040.jpg`;
 
   switch (message.text) {
     case 'profile':
