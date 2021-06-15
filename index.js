@@ -187,7 +187,7 @@ function handleText(message, replyToken, source) {
             type: 'image_carousel',
             columns: [
               {
-                imageUrl: "./static/buttons/1040.jpg",
+                imageUrl: buttonsImageURL,
                 action: { label: 'Go to LINE', type: 'uri', uri: 'https://line.me' },
               },
               {
