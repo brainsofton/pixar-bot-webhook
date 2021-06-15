@@ -121,7 +121,7 @@ function handleText(message, replyToken, source) {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');
       }
     case 'buttons':
-      return client.replyMessage(
+      return replyText(replyToken, 'เข้า Button').then(() => replyMessage(
         replyToken,
         {
           type: 'template',
@@ -139,7 +139,7 @@ function handleText(message, replyToken, source) {
             ],
           },
         }
-      );
+      ));
     case 'confirm':
       return client.replyMessage(
         replyToken,
