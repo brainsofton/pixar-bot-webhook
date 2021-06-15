@@ -6,15 +6,12 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 const cp = require('child_process');
-const ngrok = require('ngrok');
+
 // create LINE SDK config from env variables
 const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
   channelSecret: "56fe1efe851985cd2ab135863f1ed13a",
 };
-
-// base URL for webhook server
-let baseURL = process.env.BASE_URL;
 
 // create LINE SDK client
 const client = new line.Client(config);
@@ -426,13 +423,5 @@ function handleSticker(message, replyToken) {
 // listen on port
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  if (baseURL) {
-    console.log(`listening on ${baseURL}:${port}/callback`);
-  } else {
-    console.log("It seems that BASE_URL is not set. Connecting to ngrok...")
-    ngrok.connect(port).then(url => {
-      baseURL = url;
-      console.log(`listening on ${baseURL}/callback`);
-    }).catch(console.error);
-  }
+  console.log(`listening on ${port}`);
 });
