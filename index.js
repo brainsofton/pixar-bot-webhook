@@ -107,17 +107,16 @@ function handleText(message, replyToken, source) {
               `Status message: ${profile.statusMessage}`
             ]
           ))
-          .then((profile)=> quickReply(
-            replyToken,
-              [
-                {
-                  type :"action",
-                  action: {
-                    type: "location",
-                    label: `${profile.statusMessage}  Send Location`
-                  }
+          .then((profile)=> client.quickReply(
+            replyToken,[
+              {
+                type :"action",
+                action: {
+                  type: "location",
+                  label: `${profile.statusMessage}  Send Location`
                 }
-              ]
+              }
+            ]
           ));
       } else {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');
