@@ -1,4 +1,4 @@
-exports.handleText = function handleText(message, replyToken, source) {
+exports.handleText = function (message, replyToken, source) {
     const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
   
     switch (message.text) {
