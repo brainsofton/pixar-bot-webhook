@@ -3,7 +3,7 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-const hdTxt = require('./HandleText/HandleText')
+const hdTxt = require('./HandleText/HandleText.js')
 
 // create LINE SDK config from env variables
 const config = {
