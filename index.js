@@ -139,7 +139,7 @@ function handleText(message, replyToken, source) {
             ],
           },
         }
-      ));
+      );
     case 'confirm':
       return client.replyMessage(
         replyToken,
