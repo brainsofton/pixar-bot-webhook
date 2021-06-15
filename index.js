@@ -104,18 +104,22 @@ function handleText(message, replyToken, source) {
             replyToken,
             [
               `Display name: ${profile.displayName}`,
-              `Status message: ${profile.statusMessage}`,
+              `Status message: ${profile.statusMessage}`
             ]
           ))
-          .then(()=> client.replyMessage(
+          .then((profile)=> replyMessage(
             replyToken,
             {
-              quickReply: {
-                type: 'action',
-                action: {
-                  type: "location",
-                  label: 'Send Location?'
-                }
+              quickReply : {
+                items :[
+                  {
+                    type :"action",
+                    action: {
+                      type: "location",
+                      label: `${profile.statusMessage}  Send Location`
+                    }
+                  }
+                ]
               }
             }
           ));
