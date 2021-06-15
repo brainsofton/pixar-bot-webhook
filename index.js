@@ -12,18 +12,24 @@ const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
   channelSecret: "56fe1efe851985cd2ab135863f1ed13a",
 };
+
+// base URL for webhook server
+let baseURL = process.env.BASE_URL;
+
 // create LINE SDK client
 const client = new line.Client(config);
-let baseURL = process.env.BASE_URL;
+
 // create Express app
 // about Express itself: https://expressjs.com/
 const app = express();
+
+// serve static and downloaded files
 app.use('/static', express.static('static'));
 app.use('/downloaded', express.static('downloaded'));
 
 app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
-// register a webhook handler with middleware
-// about the middleware, please refer to doc
+
+// webhook callback
 app.post('/callback', line.middleware(config), (req, res) => {
   if (req.body.destination) {
     console.log("Destination User ID: " + req.body.destination);
@@ -33,15 +39,17 @@ app.post('/callback', line.middleware(config), (req, res) => {
   if (!Array.isArray(req.body.events)) {
     return res.status(500).end();
   }
-  Promise
-  .all(req.body.events.map(handleEvent))
-  .then((result) => res.json(result))
-  .catch((err) => {
-    console.error(err);
-    res.status(500).end();
-  });
+
+  // handle events separately
+  Promise.all(req.body.events.map(handleEvent))
+    .then(() => res.end())
+    .catch((err) => {
+      console.error(err);
+      res.status(500).end();
+    });
 });
 
+// simple reply function
 const replyText = (token, texts) => {
   texts = Array.isArray(texts) ? texts : [texts];
   return client.replyMessage(
@@ -50,7 +58,7 @@ const replyText = (token, texts) => {
   );
 };
 
-// event handler
+// callback function to handle a single event
 function handleEvent(event) {
   if (event.replyToken && event.replyToken.match(/^(.)\1*$/)) {
     return console.log("Test hook recieved: " + JSON.stringify(event.message));
@@ -62,16 +70,16 @@ function handleEvent(event) {
       switch (message.type) {
         case 'text':
           return handleText(message, event.replyToken, event.source);
-        // case 'image':
-        //   return handleImage(message, event.replyToken);
-        // case 'video':
-        //   return handleVideo(message, event.replyToken);
-        // case 'audio':
-        //   return handleAudio(message, event.replyToken);
-        // case 'location':
-        //   return handleLocation(message, event.replyToken);
-        // case 'sticker':
-        //   return handleSticker(message, event.replyToken);
+        case 'image':
+          return handleImage(message, event.replyToken);
+        case 'video':
+          return handleVideo(message, event.replyToken);
+        case 'audio':
+          return handleAudio(message, event.replyToken);
+        case 'location':
+          return handleLocation(message, event.replyToken);
+        case 'sticker':
+          return handleSticker(message, event.replyToken);
         default:
           throw new Error(`Unknown message: ${JSON.stringify(message)}`);
       }
@@ -285,8 +293,146 @@ function handleText(message, replyToken, source) {
   }
 }
 
+function handleImage(message, replyToken) {
+  let getContent;
+  if (message.contentProvider.type === "line") {
+    const downloadPath = path.join(__dirname, 'downloaded', `${message.id}.jpg`);
+    const previewPath = path.join(__dirname, 'downloaded', `${message.id}-preview.jpg`);
+
+    getContent = downloadContent(message.id, downloadPath)
+      .then((downloadPath) => {
+        // ImageMagick is needed here to run 'convert'
+        // Please consider about security and performance by yourself
+        cp.execSync(`convert -resize 240x jpeg:${downloadPath} jpeg:${previewPath}`);
+
+        return {
+          originalContentUrl: baseURL + '/downloaded/' + path.basename(downloadPath),
+          previewImageUrl: baseURL + '/downloaded/' + path.basename(previewPath),
+        };
+      });
+  } else if (message.contentProvider.type === "external") {
+    getContent = Promise.resolve(message.contentProvider);
+  }
+
+  return getContent
+    .then(({ originalContentUrl, previewImageUrl }) => {
+      return client.replyMessage(
+        replyToken,
+        {
+          type: 'image',
+          originalContentUrl,
+          previewImageUrl,
+        }
+      );
+    });
+}
+
+function handleVideo(message, replyToken) {
+  let getContent;
+  if (message.contentProvider.type === "line") {
+    const downloadPath = path.join(__dirname, 'downloaded', `${message.id}.mp4`);
+    const previewPath = path.join(__dirname, 'downloaded', `${message.id}-preview.jpg`);
+
+    getContent = downloadContent(message.id, downloadPath)
+      .then((downloadPath) => {
+        // FFmpeg and ImageMagick is needed here to run 'convert'
+        // Please consider about security and performance by yourself
+        cp.execSync(`convert mp4:${downloadPath}[0] jpeg:${previewPath}`);
+
+        return {
+          originalContentUrl: baseURL + '/downloaded/' + path.basename(downloadPath),
+          previewImageUrl: baseURL + '/downloaded/' + path.basename(previewPath),
+        }
+      });
+  } else if (message.contentProvider.type === "external") {
+    getContent = Promise.resolve(message.contentProvider);
+  }
+
+  return getContent
+    .then(({ originalContentUrl, previewImageUrl }) => {
+      return client.replyMessage(
+        replyToken,
+        {
+          type: 'video',
+          originalContentUrl,
+          previewImageUrl,
+        }
+      );
+    });
+}
+
+function handleAudio(message, replyToken) {
+  let getContent;
+  if (message.contentProvider.type === "line") {
+    const downloadPath = path.join(__dirname, 'downloaded', `${message.id}.m4a`);
+
+    getContent = downloadContent(message.id, downloadPath)
+      .then((downloadPath) => {
+        return {
+            originalContentUrl: baseURL + '/downloaded/' + path.basename(downloadPath),
+        };
+      });
+  } else {
+    getContent = Promise.resolve(message.contentProvider);
+  }
+
+  return getContent
+    .then(({ originalContentUrl }) => {
+      return client.replyMessage(
+        replyToken,
+        {
+          type: 'audio',
+          originalContentUrl,
+          duration: message.duration,
+        }
+      );
+    });
+}
+
+function downloadContent(messageId, downloadPath) {
+  return client.getMessageContent(messageId)
+    .then((stream) => new Promise((resolve, reject) => {
+      const writable = fs.createWriteStream(downloadPath);
+      stream.pipe(writable);
+      stream.on('end', () => resolve(downloadPath));
+      stream.on('error', reject);
+    }));
+}
+
+function handleLocation(message, replyToken) {
+  return client.replyMessage(
+    replyToken,
+    {
+      type: 'location',
+      title: message.title,
+      address: message.address,
+      latitude: message.latitude,
+      longitude: message.longitude,
+    }
+  );
+}
+
+function handleSticker(message, replyToken) {
+  return client.replyMessage(
+    replyToken,
+    {
+      type: 'sticker',
+      packageId: message.packageId,
+      stickerId: message.stickerId,
+    }
+  );
+}
+
 // listen on port
 const port = process.env.PORT || 3000;
 app.listen(port, () => {
-  console.log(`listening on ${port}`);
+  if (baseURL) {
+    console.log(`listening on ${baseURL}:${port}/callback`);
+  } else {
+    console.log("It seems that BASE_URL is not set. Connecting to ngrok...")
+    ngrok.connect(port).then(url => {
+      baseURL = url;
+      console.log(`listening on ${baseURL}/callback`);
+    }).catch(console.error);
+  }
 });
