@@ -107,20 +107,26 @@ function handleText(message, replyToken, source) {
           //     `Status message: ${profile.statusMessage}`
           //   ]
           // ))
-          .then((profile)=> client.quickReply(
-            replyToken,[
+          .then(() => client.replyMessage(
+            replyToken,
+            {
+            type:"text",
+            text: "select something",
+            quickReply :
+            { 
+              itemps:[
               {
                 type :"action",
                 action: {
                   type: "location",
-                  label: `${profile.statusMessage}  Send Location`
+                  label: 'Send Location',
+                  text: 'sushi'
                 }
               }
-            ]
-          ));
-      } else {
-        return replyText(replyToken, 'Bot can\'t use profile API without user ID');
-      }
+              ]
+            }
+          }));
+      } else return replyText(replyToken, 'Bot can\'t use profile API without user ID');
     case 'buttons':
       return client.replyMessage(
         replyToken,
