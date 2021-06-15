@@ -10,15 +10,14 @@ const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
   channelSecret: "56fe1efe851985cd2ab135863f1ed13a",
 };
-let baseURL = "https://line-pixar-bot.herokuapp.com/";
+let baseURL = "https://line-pixar-bot.herokuapp.com/callback/";
 // create LINE SDK client
 const client = new line.Client(config);
 
 // create Express app
 // about Express itself: https://expressjs.com/
 const app = express();
-app.use(express.static(path.join(__dirname,'static')))
-// app.use('/static', express.static('static'));
+app.use('/static', express.static('static'));
 app.use('/downloaded', express.static('downloaded'));
 
 app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
