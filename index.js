@@ -3,7 +3,10 @@
 
 const line = require('@line/bot-sdk');
 const express = require('express');
-
+const fs = require('fs');
+const path = require('path');
+const cp = require('child_process');
+let baseURL = process.env.BASE_URL;
 // create LINE SDK config from env variables
 const config = {
   channelAccessToken: "k5Q7QtQZFZ2v1LkfGcwEUU4V9LlPdrP34jOLzoFGYggIRtEuJWdv0VJsbletpWlz5T+ONX1bK6B8ZAbFlGggqHWwtgl2BtcG/N5z3o0QgehAiR0Z7NuUGsxguxO8SnWKigJRqnih3RiScLj1PbCzOAdB04t89/1O/w1cDnyilFU=",
@@ -15,10 +18,21 @@ const client = new line.Client(config);
 // create Express app
 // about Express itself: https://expressjs.com/
 const app = express();
+app.use('/static', express.static('static'));
+app.use('/downloaded', express.static('downloaded'));
 
+app.get('/callback', (req, res) => res.end(`I'm listening. Please access with POST.`));
 // register a webhook handler with middleware
 // about the middleware, please refer to doc
 app.post('/callback', line.middleware(config), (req, res) => {
+  if (req.body.destination) {
+    console.log("Destination User ID: " + req.body.destination);
+  }
+
+  // req.body.events should be an array of events
+  if (!Array.isArray(req.body.events)) {
+    return res.status(500).end();
+  }
   Promise
   .all(req.body.events.map(handleEvent))
   .then((result) => res.json(result))
@@ -27,6 +41,14 @@ app.post('/callback', line.middleware(config), (req, res) => {
     res.status(500).end();
   });
 });
+
+const replyText = (token, texts) => {
+  texts = Array.isArray(texts) ? texts : [texts];
+  return client.replyMessage(
+    token,
+    texts.map((text) => ({ type: 'text', text }))
+  );
+};
 
 // event handler
 function handleEvent(event) {
