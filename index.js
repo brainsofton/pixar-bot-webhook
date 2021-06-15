@@ -100,13 +100,13 @@ function handleText(message, replyToken, source) {
     case 'profile':
       if (source.userId) {
         return client.getProfile(source.userId)
-          // .then((profile) => replyText(
-          //   replyToken,
-          //   [
-          //     `Display name: ${profile.displayName}`,
-          //     `Status message: ${profile.statusMessage}`
-          //   ]
-          // ))
+          .then((profile) => replyText(
+            replyToken,
+            [
+              `Display name: ${profile.displayName}`,
+              `Status message: ${profile.statusMessage}`
+            ]
+          ))
           .then(() => client.replyMessage(
             replyToken,
             {
@@ -121,6 +121,14 @@ function handleText(message, replyToken, source) {
                   type: "location",
                   label: 'Send Location',
                   text: 'sushi'
+                }
+              },
+              {
+                type :"text",
+                action: {
+                  type: "text",
+                  label: 'ลองกดดู',
+                  text: 'กดทำไมจ๊ะ'
                 }
               }
               ]
