@@ -104,7 +104,7 @@ function handleEvent(event) {
 }
 
 function handleText(message, replyToken, source) {
-  const buttonsImageURL = './static/buttons/1040.jpg';
+  const buttonsImageURL = `${baseURL}/static/buttons/1040.jpg`;
 
   switch (message.text) {
     case 'profile':
@@ -121,7 +121,7 @@ function handleText(message, replyToken, source) {
         return replyText(replyToken, 'Bot can\'t use profile API without user ID');
       }
     case 'buttons':
-      return replyMessage(
+      return client.replyMessage(
         replyToken,
         {
           type: 'template',
